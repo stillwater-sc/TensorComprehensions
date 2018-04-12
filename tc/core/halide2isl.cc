@@ -273,6 +273,7 @@ isl::map extractAccess(
   isl::map map =
       isl::map::universe(domainSpace.map_from_domain_and_range(rangeSpace));
 
+  auto identity = isl::multi_aff::identity(rangeSpace.map_from_set());
   for (size_t i = 0; i < args.size(); i++) {
     // Then add one equality constraint per dimension to encode the
     // point in the allocation actually read/written for each point in
@@ -280,8 +281,7 @@ isl::map extractAccess(
     // have to leave some things unconstrained.
 
     // The coordinate written to in the range ...
-    auto rangePoint =
-        isl::pw_aff(isl::local_space(rangeSpace), isl::dim_type::set, i);
+    auto rangePoint = identity.get_aff(i);
     // ... equals the coordinate accessed as a function of the domain.
     auto domainPoint = halide2isl::makeIslAffFromExpr(domainSpace, args[i]);
     if (!domainPoint.is_null()) {
