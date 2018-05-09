@@ -138,11 +138,11 @@ std::unique_ptr<TensorReferenceGroup> TensorReferenceGroup::makeSingleton(
 isl::set ScopedFootprint::footprint(isl::set domain) const {
   auto space = add_range(domain.get_space(), size());
   auto accessed = isl::map::universe(space).intersect_domain(domain);
-  auto lspace = isl::local_space(accessed.get_space().range());
 
+  auto identity = isl::multi_aff::identity(space.range().map_from_set());
   for (size_t i = 0; i < size(); ++i) {
     auto dim = at(i);
-    auto rhs = isl::aff(lspace, isl::dim_type::set, i);
+    auto rhs = identity.get_aff(i);
     isl::map partial = (isl::aff_map(dim.lowerBound) <= rhs) &
         (isl::aff_map(dim.lowerBound + dim.size) > rhs);
     accessed = accessed & partial;
