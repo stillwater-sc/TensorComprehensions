@@ -279,7 +279,7 @@ inline bool operator!=(const isl::id& id1, const isl::id& id2) {
 template <typename T>
 isl::multi_val makeMultiVal(isl::space s, const std::vector<T>& vals) {
   isl::multi_val mv = isl::multi_val::zero(s);
-  CHECK_EQ(vals.size(), s.dim(isl::dim_type::set));
+  CHECK_EQ(vals.size(), static_cast<size_t>(mv.size()));
   for (size_t i = 0; i < vals.size(); ++i) {
     mv = mv.set_val(i, isl::val(s.get_ctx(), vals[i]));
   }
