@@ -270,10 +270,13 @@ isl::multi_union_pw_aff MappedScop::reductionMapSchedule(
   auto reductionDim = reductionBand->nOuterCoincident();
   auto nMappedThreads = std::min(numThreads.view.size(), reductionDim + 1);
   CHECK_GE(nMember, reductionDim);
-  reductionSchedule = reductionSchedule.drop_dims(
-      isl::dim_type::set, reductionDim + 1, nMember - (reductionDim + 1));
-  reductionSchedule = reductionSchedule.drop_dims(
-      isl::dim_type::set, 0, reductionDim - nMappedThreads + 1);
+
+  auto list = reductionSchedule.get_union_pw_aff_list();
+  auto space = reductionSchedule.get_space().domain();
+  list = list.drop(reductionDim + 1, nMember - (reductionDim + 1));
+  list = list.drop(0, reductionDim - nMappedThreads + 1);
+  space = addRange(space, list.n());
+  reductionSchedule = isl::multi_union_pw_aff(space, list);
 
   return reductionSchedule;
 }
