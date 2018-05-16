@@ -98,14 +98,6 @@ ScopedFootprint outputRanges(isl::map access) {
   }
   return footprint;
 }
-
-// Given a set space, construct a map space with the input as domain and
-// a range of the given size.
-isl::space add_range(isl::space space, unsigned dim) {
-  auto range = space.params().unnamed_set_from_params(dim);
-  return space.map_from_domain_and_range(range);
-}
-
 } // namespace
 
 // Access has the shape :: [S -> ref] -> O
@@ -136,7 +128,7 @@ std::unique_ptr<TensorReferenceGroup> TensorReferenceGroup::makeSingleton(
 }
 
 isl::set ScopedFootprint::footprint(isl::set domain) const {
-  auto space = add_range(domain.get_space(), size());
+  auto space = addRange(domain.get_space(), size());
   auto accessed = isl::map::universe(space).intersect_domain(domain);
 
   auto identity = isl::multi_aff::identity(space.range().map_from_set());
@@ -154,7 +146,7 @@ isl::multi_aff ScopedFootprint::lowerBounds() const {
   if (size() == 0) {
     throw promotion::PromotionNYI("promotion for scalars");
   }
-  auto space = add_range(at(0).lowerBound.get_space().domain(), size());
+  auto space = addRange(at(0).lowerBound.get_space().domain(), size());
   auto ma = isl::multi_aff::zero(space);
 
   int i = 0;
@@ -449,7 +441,7 @@ isl::multi_aff dropDummyTensorDimensions(
     }
   }
 
-  space = add_range(space, list.n());
+  space = addRange(space, list.n());
   return isl::multi_aff(space, list);
 }
 } // namespace
